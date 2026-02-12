@@ -83,10 +83,19 @@
             text-decoration: underline;
         }
 
+        #bear-trail div {
+            position: fixed;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: 9999;
+            font-size: 24px;
+            user-select: none;
+        }
     </style>
 </head>
 <body>
-    <div id="cursor-bear" style="position: fixed; pointer-events: none; z-index: 9999; font-size: 30px; transition: transform 0.1s ease-out; will-change: transform;">🧸</div>
+    <div id="bear-trail"></div>
     <div class="archive-container">
     <h1>Your Collection</h1>
     <ul id="archiveList" class="archive-list">
@@ -120,40 +129,56 @@
     }
     loadArchive();
 
-    const bear = document.getElementById('cursor-bear');
-    let mouseX = 0;
-    let mouseY = 0;
-    let bearX = 0;
-    let bearY = 0;
+    const bearContainer = document.getElementById('bear-trail');
+    const emojis = ['🧸', '🧸', '🧸', '🧸', '🧸']; 
+    const dots = [];
+    const mouse = { x: 0, y: 0 };
 
-    // 1. Track the mouse/touch position
-    window.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
+    // 1. Create the 5 bears
+    emojis.forEach((emoji) => {
+        const div = document.createElement('div');
+        div.innerHTML = emoji;
+        bearContainer.appendChild(div);
+        dots.push({ x: 0, y: 0, element: div });
     });
 
-    window.addEventListener('touchmove', (e) => {
-        // For phones: take the first finger's position
-        mouseX = e.touches[0].clientX;
-        mouseY = e.touches[0].clientY;
-    });
+    // 2. Track mouse and touch
+    const updatePosition = (e) => {
+        if (e.touches) {
+            mouse.x = e.touches[0].clientX;
+            mouse.y = e.touches[0].clientY;
+        } else {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+        }
+    };
 
-    // 2. The "Ease" Animation (Makes the bear follow smoothly rather than snapping)
-    function animate() {
-        // This math creates a "delay" so the bear feels like it's floating/chasing
-        // Change 0.1 to a smaller number (like 0.05) to make it slower/lazier
-        const speed = 0.08; 
-        
-        bearX += (mouseX - bearX) * speed;
-        bearY += (mouseY - bearY) * speed;
+    window.addEventListener('mousemove', updatePosition);
+    window.addEventListener('touchmove', updatePosition);
 
-        // Offset the bear slightly so it's not directly under the finger/cursor
-        bear.style.transform = `translate(${bearX + 15}px, ${bearY + 15}px)`;
+    // 3. The Snake Math
+    function animateSnake() {
+        let x = mouse.x;
+        let y = mouse.y;
 
-        requestAnimationFrame(animate);
+        dots.forEach((dot, index) => {
+            // "Snake" logic: Each dot follows the coordinates of the one before it
+            // We use 0.3 for a "close" follow. 
+            // Lower numbers (0.1) = longer, lazier snake. Higher (0.5) = tighter snake.
+            dot.x += (x - dot.x) * 0.4; 
+            dot.y += (y - dot.y) * 0.4;
+            
+            dot.element.style.transform = `translate(${dot.x}px, ${dot.y}px)`;
+
+            // For the next bear in the loop, use the current bear's position as the target
+            x = dot.x;
+            y = dot.y;
+        });
+
+        requestAnimationFrame(animateSnake);
     }
 
-    animate();
+    animateSnake();
 </script>
 
 </body>
