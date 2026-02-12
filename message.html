@@ -79,7 +79,7 @@
 
         try {
             // 3. Fetch the specific encrypted file
-            const response = await fetch(`./messages/${messageId}.txt`);
+            const response = await fetch(`./messages/encrypted/${messageId}.txt`);
             
             if (!response.ok) {
                 throw new Error("Message file not found.");

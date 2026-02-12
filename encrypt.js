@@ -11,10 +11,11 @@ if (!fileName) {
 }
 
 try {
-    // 2. Look for the unencrypted file
-    const inputPath = `messages/${fileName}.txt`;
-    const outputPath = `messages/${fileName}-encrypted.txt`;
-
+    // Look in the unencrypted subfolder
+    const inputPath = `messages/unencrypted/${fileName}-unencrypted.txt`;
+    
+    // Save in the encrypted subfolder
+    const outputPath = `messages/encrypted/${fileName}.txt`;
     if (!fs.existsSync(inputPath)) {
         throw new Error(`File not found: ${inputPath}`);
     }
