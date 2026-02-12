@@ -3,112 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>For my baby</title>
-    
+    <title>The Archive | For Faraday</title>
     <style>
-    body {
-        background-color: #fff5f5;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        align-items: center; /* Horizontal center */
-        justify-content: center; /* Vertical center */
-        min-height: 100vh;
-        font-family: 'Courier New', Courier, monospace;
-    }
+        body {
+            background-color: #fff5f5; 
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            font-family: 'Courier New', Courier, monospace;
+            color: #4a4a4a;
+        }
 
-    .container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 90%;
-        max-width: 600px;
-    }
+        .archive-container {
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            padding: 40px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(255, 182, 193, 0.3);
+        }
 
-    #messageButton {
-        background-color: #ff4b5c;
-        color: white;
-        border: none;
-        padding: 15px 30px;
-        font-size: 1.2rem;
-        border-radius: 50px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-    }
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: #ff4b5c;
+        }
 
-    /* Fade-in Logic */
-    #messageDisplay {
-        opacity: 0;
-        transition: opacity 2s ease-in; /* Smooth 2-second fade */
-        margin-top: 20px;
-        white-space: pre-wrap;
-        text-align: center; /* Centralizes the text itself */
-        color: #4a4a4a;
-        font-size: 1.1rem;
-    }
+        .archive-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
 
-    #messageDisplay.visible {
-        opacity: 1;
-    }
+        .archive-item {
+            margin: 15px 0;
+            transition: transform 0.2s ease;
+        }
 
-    .archive-link {
-        margin-top: 40px;
-        font-size: 0.8rem;
-        color: #ff4b5c;
-        text-decoration: none;
-        opacity: 0.6;
-    }
+        .archive-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .archive-link {
+            display: block;
+            padding: 15px;
+            text-decoration: none;
+            color: #4a4a4a;
+            border: 1px solid #ffe0e0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            background-color: #fffafb;
+        }
+
+        .archive-link:hover {
+            background-color: #ff4b5c;
+            color: white;
+            border-color: #ff4b5c;
+        }
+
+        .heart-icon {
+            margin-right: 8px;
+        }
+
+        .back-home {
+            margin-top: 30px;
+            display: inline-block;
+            font-size: 0.9rem;
+            color: #ff4b5c;
+            text-decoration: none;
+            opacity: 0.7;
+        }
+
+        .back-home:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
     </style>
+</head>
+<body>
 
-    <div class="container">
-        <button id="messageButton" onclick="openMessage()">Open your message</button>
-        <div id="messageDisplay"></div>
-        <a href="archive.html" class="archive-link">View Archive</a>
-    </div>
+    <div class="archive-container">
+    <h1>Our Collection</h1>
+    <ul id="archiveList" class="archive-list">
+        </ul>
+</div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-    <script>
-        async function openMessage() {
-        // 1. Ask for the password
-        const password = prompt("Enter the secret date (DDMMYYYY):");
-        if (!password) return;
-
-        // 2. Get the message ID from the URL (e.g., ?msg=ten-things)
-        const urlParams = new URLSearchParams(window.location.search);
-        const messageId = urlParams.get('msg') || '2026'; // Defaults to 2026 if no ID found
-
+<script>
+    async function loadArchive() {
         try {
-            // 3. Fetch the specific encrypted file
-            const response = await fetch(`./messages/${messageId}.txt`);
+            // Fetch the list from the messages folder
+            const response = await fetch('messages/list.json');
+            if (!response.ok) throw new Error('Could not load list.json');
             
-            if (!response.ok) {
-                throw new Error("Message file not found.");
-            }
+            const messages = await response.json();
+            const listElement = document.getElementById('archiveList');
 
-            const encryptedBase64 = await response.text();
-
-            // 4. Decrypt
-            const bytes = CryptoJS.AES.decrypt(encryptedBase64, password);
-            const decryptedMessage = bytes.toString(CryptoJS.enc.Utf8);
-
-            if (!decryptedMessage) {
-                alert("Incorrect password. Please try again!");
-                return;
-            }
-
-            // 5. Hide button and show message with Fade-in
-            const btn = document.getElementById('messageButton');
-            const display = document.getElementById('messageDisplay');
-            
-            btn.style.display = 'none';
-            display.innerHTML = decryptedMessage;
-            display.classList.add('visible'); // Triggers the CSS opacity fade
-
+            messages.forEach(msg => {
+                const li = document.createElement('li');
+                li.className = 'archive-item';
+                // Clean link without emojis
+                li.innerHTML = `
+                    <a href="message.html?msg=${msg.id}" class="archive-link">
+                        ${msg.title}
+                    </a>
+                `;
+                listElement.appendChild(li);
+            });
         } catch (e) {
-            console.error(e);
-            alert("Oops! Something went wrong loading this message.");
+            console.error("Archive Error:", e);
         }
     }
-    </script>
+    loadArchive();
+</script>
 
+</body>
 </html>

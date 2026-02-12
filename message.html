@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For my baby</title>
+    
+    <style>
+    body {
+        background-color: #fff5f5;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Horizontal center */
+        justify-content: center; /* Vertical center */
+        min-height: 100vh;
+        font-family: 'Courier New', Courier, monospace;
+    }
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 90%;
+        max-width: 600px;
+    }
+
+    #messageButton {
+        background-color: #ff4b5c;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        font-size: 1.2rem;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    /* Fade-in Logic */
+    #messageDisplay {
+        opacity: 0;
+        transition: opacity 2s ease-in; /* Smooth 2-second fade */
+        margin-top: 20px;
+        white-space: pre-wrap;
+        text-align: center; /* Centralizes the text itself */
+        color: #4a4a4a;
+        font-size: 1.1rem;
+    }
+
+    #messageDisplay.visible {
+        opacity: 1;
+    }
+
+    .archive-link {
+        margin-top: 40px;
+        font-size: 0.8rem;
+        color: #ff4b5c;
+        text-decoration: none;
+        opacity: 0.6;
+    }
+    </style>
+
+    <div class="container">
+        <button id="messageButton" onclick="openMessage()">Click me</button>
+        <div id="messageDisplay"></div>
+        <a href="index.html" class="archive-link">View Archive</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script>
+        async function openMessage() {
+        // 1. Ask for the password
+        const password = prompt("Enter the secret date (DDMMYYYY):");
+        if (!password) return;
+
+        // 2. Get the message ID from the URL (e.g., ?msg=ten-things)
+        const urlParams = new URLSearchParams(window.location.search);
+        const messageId = urlParams.get('msg') || '2026'; // Defaults to 2026 if no ID found
+
+        try {
+            // 3. Fetch the specific encrypted file
+            const response = await fetch(`./messages/${messageId}.txt`);
+            
+            if (!response.ok) {
+                throw new Error("Message file not found.");
+            }
+
+            const encryptedBase64 = await response.text();
+
+            // 4. Decrypt
+            const bytes = CryptoJS.AES.decrypt(encryptedBase64, password);
+            const decryptedMessage = bytes.toString(CryptoJS.enc.Utf8);
+
+            if (!decryptedMessage) {
+                alert("Incorrect password. Please try again!");
+                return;
+            }
+
+            // 5. Hide button and show message with Fade-in
+            const btn = document.getElementById('messageButton');
+            const display = document.getElementById('messageDisplay');
+            
+            btn.style.display = 'none';
+            display.innerHTML = decryptedMessage;
+            display.classList.add('visible'); // Triggers the CSS opacity fade
+
+        } catch (e) {
+            console.error(e);
+            alert("Oops! Something went wrong loading this message.");
+        }
+    }
+    </script>
+
+</html>
