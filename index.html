@@ -65,30 +65,57 @@
         <div id="message"></div>
     </div>
 
-    <script>
-        const messageText = "I wanted to write you something special... but I also wanted to spare my hands. I hope this is fun!";
-        let i = 0;
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
-        function typeWriter() {
-            if (i < messageText.length) {
-                document.getElementById("message").innerHTML += messageText.charAt(i);
+    <script>
+    async function openValentine() {
+        const password = prompt("Enter the secret date (DDMMYYYY):");
+        const year = "2026"; // This matches your filename 2026.txt
+
+        try {
+            // 1. Fetch the encrypted file from your /messages folder
+            const response = await fetch(`./messages/${year}.txt`);
+            
+            if (!response.ok) throw new Error("Message file not found.");
+            
+            const encryptedBase64 = await response.text();
+
+            // 2. Decrypt the content
+            const bytes = CryptoJS.AES.decrypt(encryptedBase64, password);
+            const decryptedMessage = bytes.toString(CryptoJS.enc.Utf8);
+
+            if (!decryptedMessage) {
+                alert("Incorrect password. Hint: The day we first met!");
+                return;
+            }
+
+            // 3. Hide the button and start the typewriter
+            document.getElementById('valentineButton').style.display = 'none';
+            startTypewriter(decryptedMessage);
+
+        } catch (error) {
+            console.error(error);
+            alert("Oops! Something went wrong loading the message.");
+        }
+    }
+
+    function startTypewriter(text) {
+        const display = document.getElementById('messageDisplay');
+        let i = 0;
+        // Speed in milliseconds
+        const speed = 50; 
+
+        function type() {
+            if (i < text.length) {
+                display.innerHTML += text.charAt(i);
                 i++;
-                setTimeout(typeWriter, 50);
+                setTimeout(type, speed);
+                // Scroll to bottom as it types
+                window.scrollTo(0, document.body.scrollHeight);
             }
         }
-
-        function createHeart() {
-            const heart = document.createElement('div');
-            heart.classList.add('heart');
-            heart.innerHTML = '❤️';
-            heart.style.left = Math.random() * 100 + 'vw';
-            heart.style.animationDuration = Math.random() * 5 + 5 + 's';
-            document.body.appendChild(heart);
-            setTimeout(() => heart.remove(), 10000);
-        }
-
-        setInterval(createHeart, 300);
-        window.onload = typeWriter;
+        type();
+    }
     </script>
 </body>
 </html>
