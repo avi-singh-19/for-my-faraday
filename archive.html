@@ -87,25 +87,31 @@
 <body>
 
     <div class="archive-container">
-        <h1>Our Collection</h1>
-        
-        <ul class="archive-list">
-            <li class="archive-item">
-                <a href="index.html" class="archive-link">
-                    Valentine's Day 2026
-                </a>
-            </li>
-            
-            <li class="archive-item">
-                <a href="ten-things.html" class="archive-link">
-                    10 Things I miss about you when you're gone
-                </a>
-            </li>
-            
-            </ul>
+    <h1>Our Collection</h1>
+    <ul id="archiveList" class="archive-list">
+        </ul>
+</div>
 
-        <a href="index.html" class="back-home">← Back to latest</a>
-    </div>
+<script>
+    async function loadArchive() {
+        const response = await fetch('./messages/list.json');
+        const messages = await response.json();
+        const listElement = document.getElementById('archiveList');
+
+        messages.forEach(msg => {
+            const li = document.createElement('li');
+            li.className = 'archive-item';
+            // This links to your index.html template
+            li.innerHTML = `
+                <a href="index.html?msg=${msg.id}" class="archive-link">
+                    <span class="heart-icon">${msg.emoji}</span> ${msg.title}
+                </a>
+            `;
+            listElement.appendChild(li);
+        });
+    }
+    loadArchive();
+</script>
 
 </body>
 </html>

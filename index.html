@@ -68,32 +68,45 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
-    async function openMessage() {
+        async function openMessage() {
+        // 1. Ask for the password
         const password = prompt("Enter the secret date (DDMMYYYY):");
+        if (!password) return;
+
+        // 2. Get the message ID from the URL (e.g., ?msg=ten-things)
+        const urlParams = new URLSearchParams(window.location.search);
+        const messageId = urlParams.get('msg') || '2026'; // Defaults to 2026 if no ID found
+
         try {
-            const response = await fetch('./messages/2026.txt');
+            // 3. Fetch the specific encrypted file
+            const response = await fetch(`./messages/${messageId}.txt`);
+            
+            if (!response.ok) {
+                throw new Error("Message file not found.");
+            }
+
             const encryptedBase64 = await response.text();
 
-            // Attempt decryption
+            // 4. Decrypt
             const bytes = CryptoJS.AES.decrypt(encryptedBase64, password);
             const decryptedMessage = bytes.toString(CryptoJS.enc.Utf8);
 
-            // POINT 1: Validate if decryption actually worked
-            if (!decryptedMessage || decryptedMessage.length === 0) {
+            if (!decryptedMessage) {
                 alert("Incorrect password. Please try again!");
                 return;
             }
 
-            // POINT 2 & 3: Hide button and Fade in
+            // 5. Hide button and show message with Fade-in
             const btn = document.getElementById('messageButton');
             const display = document.getElementById('messageDisplay');
             
             btn.style.display = 'none';
             display.innerHTML = decryptedMessage;
-            display.classList.add('visible'); // Triggers the CSS fade
+            display.classList.add('visible'); // Triggers the CSS opacity fade
 
         } catch (e) {
-            alert("Incorrect password or error loading file.");
+            console.error(e);
+            alert("Oops! Something went wrong loading this message.");
         }
     }
     </script>
