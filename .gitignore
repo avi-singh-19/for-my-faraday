@@ -4,5 +4,5 @@ node_modules/
 *.log
 code.txt
 10-things-unencrypted.txt
-birthday_unencrypted.txt
-favourite_names.txt
+birthday-unencrypted.txt
+favourite_names-unencrypted.txt
