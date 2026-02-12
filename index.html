@@ -4,120 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>For my baby</title>
+    
     <style>
-        :root {
-            --bg-color: #fff5f5;
-            --text-color: #d63384;
-            --heart-color: rgba(214, 51, 132, 0.2);
-        }
+    body {
+        background-color: #fff5f5;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Horizontal center */
+        justify-content: center; /* Vertical center */
+        min-height: 100vh;
+        font-family: 'Courier New', Courier, monospace;
+    }
 
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background-color: var(--bg-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
-            text-align: center;
-        }
+    .container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 90%;
+        max-width: 600px;
+    }
 
-        .container {
-            z-index: 2;
-            padding: 20px;
-        }
+    #messageButton {
+        background-color: #ff4b5c;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        font-size: 1.2rem;
+        border-radius: 50px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
 
-        h1 {
-            color: var(--text-color);
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-        }
+    /* Fade-in Logic */
+    #messageDisplay {
+        opacity: 0;
+        transition: opacity 2s ease-in; /* Smooth 2-second fade */
+        margin-top: 20px;
+        white-space: pre-wrap;
+        text-align: center; /* Centralizes the text itself */
+        color: #4a4a4a;
+        font-size: 1.1rem;
+    }
 
-        #message {
-            font-size: 1.2rem;
-            color: #555;
-            line-height: 1.6;
-            max-width: 500px;
-            min-height: 100px;
-        }
+    #messageDisplay.visible {
+        opacity: 1;
+    }
 
-        /* Floating Heart Background */
-        .heart {
-            position: absolute;
-            color: var(--heart-color);
-            font-size: 20px;
-            user-select: none;
-            animation: float 10s linear infinite;
-        }
-
-        @keyframes float {
-            0% { transform: translateY(100vh) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
-        }
+    .archive-link {
+        margin-top: 40px;
+        font-size: 0.8rem;
+        color: #ff4b5c;
+        text-decoration: none;
+        opacity: 0.6;
+    }
     </style>
-</head>
-<body>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
     <div class="container">
-        <h1>For my Faraday Bear</h1>
-        <div id="message"></div>
+        <button id="messageButton" onclick="openMessage()">Open your message</button>
+        <div id="messageDisplay"></div>
+        <a href="archive.html" class="archive-link">View Archive</a>
     </div>
 
-    <button id="messageButton" onclick="openMessage()">Open your message</button>
-    <div id="messageDisplay"></div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script>
     async function openMessage() {
         const password = prompt("Enter the secret date (DDMMYYYY):");
-        const year = "2026"; // This matches your filename 2026.txt
-
         try {
-            // 1. Fetch the encrypted file from your /messages folder
-            const response = await fetch(`./messages/${year}.txt`);
-            
-            if (!response.ok) throw new Error("Message file not found.");
-            
+            const response = await fetch('./messages/2026.txt');
             const encryptedBase64 = await response.text();
 
-            // 2. Decrypt the content
+            // Attempt decryption
             const bytes = CryptoJS.AES.decrypt(encryptedBase64, password);
             const decryptedMessage = bytes.toString(CryptoJS.enc.Utf8);
 
-            if (!decryptedMessage) {
-                alert("Incorrect password. Hint: The day we first met!");
+            // POINT 1: Validate if decryption actually worked
+            if (!decryptedMessage || decryptedMessage.length === 0) {
+                alert("Incorrect password. Please try again!");
                 return;
             }
 
-            // 3. Hide the button and start the typewriter
-            document.getElementById('messageButton').style.display = 'none';
-            startTypewriter(decryptedMessage);
+            // POINT 2 & 3: Hide button and Fade in
+            const btn = document.getElementById('messageButton');
+            const display = document.getElementById('messageDisplay');
+            
+            btn.style.display = 'none';
+            display.innerHTML = decryptedMessage;
+            display.classList.add('visible'); // Triggers the CSS fade
 
-        } catch (error) {
-            console.error(error);
-            alert("Oops! Something went wrong loading the message.");
+        } catch (e) {
+            alert("Incorrect password or error loading file.");
         }
-    }
-
-    function startTypewriter(text) {
-        const display = document.getElementById('messageDisplay');
-        let i = 0;
-        // Speed in milliseconds
-        const speed = 50; 
-
-        function type() {
-            if (i < text.length) {
-                display.innerHTML += text.charAt(i);
-                i++;
-                setTimeout(type, speed);
-                // Scroll to bottom as it types
-                window.scrollTo(0, document.body.scrollHeight);
-            }
-        }
-        type();
     }
     </script>
-</body>
+
 </html>
