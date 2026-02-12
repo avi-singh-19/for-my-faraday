@@ -83,37 +83,10 @@
             text-decoration: underline;
         }
 
-        /* Floating Elements Style */
-        .floating-item {
-            position: fixed;
-            bottom: -50px; /* Start just off-screen */
-            font-size: 2rem;
-            user-select: none;
-            pointer-events: none; /* So she can click "through" them to the buttons */
-            z-index: -1; /* Keep them behind the text and buttons */
-            animation: floatUp linear infinite;
-        }
-
-        @keyframes floatUp {
-            0% {
-                transform: translateY(0) rotate(0deg);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.7;
-            }
-            90% {
-                opacity: 0.7;
-            }
-            100% {
-                transform: translateY(-110vh) rotate(360deg);
-                opacity: 0;
-            }
-        }
     </style>
 </head>
 <body>
-
+    <div id="cursor-bear" style="position: fixed; pointer-events: none; z-index: 9999; font-size: 30px; transition: transform 0.1s ease-out; will-change: transform;">🧸</div>
     <div class="archive-container">
     <h1>Your Collection</h1>
     <ul id="archiveList" class="archive-list">
@@ -147,35 +120,40 @@
     }
     loadArchive();
 
-    function createFloatingIcons() {
-    const icons = ['❤️', '🧸', '💖', '🧸', '✨']; 
-    const container = document.body;
+    const bear = document.getElementById('cursor-bear');
+    let mouseX = 0;
+    let mouseY = 0;
+    let bearX = 0;
+    let bearY = 0;
 
-    setInterval(() => {
-        const icon = document.createElement('div');
-        icon.className = 'floating-item';
-        icon.innerText = icons[Math.floor(Math.random() * icons.length)];
+    // 1. Track the mouse/touch position
+    window.addEventListener('mousemove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+
+    window.addEventListener('touchmove', (e) => {
+        // For phones: take the first finger's position
+        mouseX = e.touches[0].clientX;
+        mouseY = e.touches[0].clientY;
+    });
+
+    // 2. The "Ease" Animation (Makes the bear follow smoothly rather than snapping)
+    function animate() {
+        // This math creates a "delay" so the bear feels like it's floating/chasing
+        // Change 0.1 to a smaller number (like 0.05) to make it slower/lazier
+        const speed = 0.08; 
         
-        // Randomize position and speed
-        const startX = Math.random() * window.innerWidth;
-        const duration = 10 + Math.random() * 15; // Between 10 and 25 seconds
-        const size = 1 + Math.random() * 1.5; // Random sizes
+        bearX += (mouseX - bearX) * speed;
+        bearY += (mouseY - bearY) * speed;
 
-        icon.style.left = `${startX}px`;
-        icon.style.animationDuration = `${duration}s`;
-        icon.style.fontSize = `${size}rem`;
+        // Offset the bear slightly so it's not directly under the finger/cursor
+        bear.style.transform = `translate(${bearX + 15}px, ${bearY + 15}px)`;
 
-        container.appendChild(icon);
-
-        // Clean up: remove the icon after it finishes floating
-        setTimeout(() => {
-            icon.remove();
-        }, duration * 1000);
-    }, 2000); // Create a new icon every 2 seconds
+        requestAnimationFrame(animate);
     }
 
-    // Start the floating magic!
-    createFloatingIcons();
+    animate();
 </script>
 
 </body>
