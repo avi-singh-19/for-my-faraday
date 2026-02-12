@@ -59,16 +59,18 @@
     </style>
 </head>
 <body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
     <div class="container">
         <h1>For my Faraday Bear</h1>
         <div id="message"></div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <button id="messageButton" onclick="openMessage()">Open your message</button>
+    <div id="messageDisplay"></div>
 
     <script>
-    async function openValentine() {
+    async function openMessage() {
         const password = prompt("Enter the secret date (DDMMYYYY):");
         const year = "2026"; // This matches your filename 2026.txt
 
