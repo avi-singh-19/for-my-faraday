@@ -94,21 +94,28 @@
 
 <script>
     async function loadArchive() {
-        const response = await fetch('./messages/list.json');
-        const messages = await response.json();
-        const listElement = document.getElementById('archiveList');
+        try {
+            // Fetch the list from the messages folder
+            const response = await fetch('messages/list.json');
+            if (!response.ok) throw new Error('Could not load list.json');
+            
+            const messages = await response.json();
+            const listElement = document.getElementById('archiveList');
 
-        messages.forEach(msg => {
-            const li = document.createElement('li');
-            li.className = 'archive-item';
-            // This links to your index.html template
-            li.innerHTML = `
-                <a href="index.html?msg=${msg.id}" class="archive-link">
-                    <span class="heart-icon">${msg.emoji}</span> ${msg.title}
-                </a>
-            `;
-            listElement.appendChild(li);
-        });
+            messages.forEach(msg => {
+                const li = document.createElement('li');
+                li.className = 'archive-item';
+                // Clean link without emojis
+                li.innerHTML = `
+                    <a href="index.html?msg=${msg.id}" class="archive-link">
+                        ${msg.title}
+                    </a>
+                `;
+                listElement.appendChild(li);
+            });
+        } catch (e) {
+            console.error("Archive Error:", e);
+        }
     }
     loadArchive();
 </script>
