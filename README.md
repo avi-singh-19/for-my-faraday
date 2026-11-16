@@ -24,3 +24,6 @@ git add messages/list.json
 git commit -m "feat: added anniversary message"
 git push origin main
 ```
+
+### Step 5: Deployment
+On Github, under 'Code', check the 'Deploymments' tab.
